@@ -5,6 +5,8 @@ import java.util.*
 
 fun base64Decode(base64Str: String): ByteArray = Base64.getDecoder().decode(base64Str)
 
+fun String.toChar() = this.toCharArray()[0]
+
 class Timer {
     private var start = clearTimer()
     private fun clearTimer(): Long {

@@ -5,7 +5,7 @@ import java.awt.image.BufferedImage
 import java.util.ArrayList
 
 
-fun cropBorders(image: BufferedImage, color: Int = -1): BufferedImage? {  // default color is white; black is -16777216
+fun cropBorders(image: BufferedImage, color: Int = -1): BufferedImage {  // default color is white; black is -16777216
     val width = image.width
     val height = image.height
 
@@ -23,7 +23,7 @@ fun cropBorders(image: BufferedImage, color: Int = -1): BufferedImage? {  // def
             }
 
     if (top == height)  // no pixels with that color
-        return null
+        throw IllegalArgumentException()
 
     bottom@
     for (y in (0 until height).reversed())

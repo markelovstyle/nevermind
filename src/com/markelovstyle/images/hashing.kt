@@ -16,5 +16,3 @@ fun getHash(image: BufferedImage, side: Int = 64, color: Int = -1): BigInteger {
 }
 
 fun countBinaryOnes(number: BigInteger): Long = number.toString(2).chars().filter { item: Int -> item == '1'.toInt() }.count()
-
-fun hammingDistance(a: BigInteger, b: BigInteger): Long = countBinaryOnes(a xor b)
