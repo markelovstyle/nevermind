@@ -1,11 +1,14 @@
 package com.markelovstyle.images
 
-import java.awt.Rectangle
+import com.markelovstyle.images.types.Borders
 import java.awt.image.BufferedImage
-import java.util.ArrayList
 
+fun getLineHeight(image: BufferedImage, color: Int = -1): Float {  // default color is white; black is -16777216
+    val borders = getBorders(image, color)
+    return (borders.top + borders.height / 2).toFloat() / image.height  // returns float in interval [0..1], where 0 is top, 1 is bottom
+}
 
-fun cropBorders(image: BufferedImage, color: Int = -1): BufferedImage {  // default color is white; black is -16777216
+fun getBorders(image: BufferedImage, color: Int = -1): Borders {  // default color is white; black is -16777216
     val width = image.width
     val height = image.height
 
@@ -46,8 +49,11 @@ fun cropBorders(image: BufferedImage, color: Int = -1): BufferedImage {  // defa
                 right = x
                 break@right
             }
+    return Borders(left, right, top, bottom)
+}
 
-    return crop(image, Rectangle(left, top, right - left + 1, bottom - top + 1))
+fun cropBorders(image: BufferedImage, color: Int = -1): BufferedImage {  // default color is white; black is -16777216
+    return crop(image, getBorders(image, color))
 }
 
 fun addBorders(source: BufferedImage, w: Int, h: Int): BufferedImage {
@@ -66,52 +72,17 @@ fun addBorders(source: BufferedImage, w: Int, h: Int): BufferedImage {
 }
 
 
-fun crop(source: BufferedImage, rectangle: Rectangle): BufferedImage {
-    val image = BufferedImage(rectangle.getWidth().toInt(), rectangle.getHeight().toInt(), BufferedImage.TYPE_BYTE_BINARY)
+fun crop(source: BufferedImage, borders: Borders): BufferedImage {
+    val image = BufferedImage(borders.width, borders.height, BufferedImage.TYPE_BYTE_BINARY)
     val g = image.graphics
     g.drawImage(source, 0, 0,
-            rectangle.getWidth().toInt(),
-            rectangle.getHeight().toInt(),
-            rectangle.getX().toInt(),
-            rectangle.getY().toInt(),
-            (rectangle.getX() + rectangle.getWidth().toInt()).toInt(),
-            (rectangle.getY() + rectangle.getHeight().toInt()).toInt(),
+            borders.width,
+            borders.height,
+            borders.left,
+            borders.top,
+            borders.right,
+            borders.bottom,
             null)
     g.dispose()
     return image
-}
-
-fun getLetters(image: BufferedImage, color: Int = -1): ArrayList<BufferedImage> {  // default color is white; black is -16777216
-    val width = image.width
-    val height = image.height
-
-    val emptyLines: ArrayList<Int> = arrayListOf()
-    for (x in 0 until width) {
-        var isEmpty = true
-        for (y in 0 until height)
-            if (image.getRGB(x, y) == color) {
-                isEmpty = false
-                break
-            }
-        if (isEmpty)
-            emptyLines.add(x)
-    }
-    val borders: ArrayList<Int> = arrayListOf(0, emptyLines.first())
-    for (i in 1 until emptyLines.size)
-        if (emptyLines[i] - emptyLines[i - 1] != 1) {
-            borders.add(emptyLines[i - 1])
-            borders.add(emptyLines[i])
-        }
-    borders.add(emptyLines.last())
-    borders.add(width - 1)
-
-    val rectangles: ArrayList<Rectangle> = arrayListOf()
-    for (i in 0 until borders.size step 2)
-        rectangles.add(Rectangle(borders[i] + 1, 0, borders[i + 1] - borders[i], height))
-
-    val letters: ArrayList<BufferedImage> = arrayListOf()
-    for (rectangle in rectangles)
-        letters.add(crop(image, rectangle))
-
-    return letters
 }

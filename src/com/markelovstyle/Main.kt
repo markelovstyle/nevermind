@@ -1,10 +1,9 @@
 package com.markelovstyle
 
-import com.markelovstyle.compare.linearFind
 import com.markelovstyle.data.specifyDataFile
-import com.markelovstyle.data.updateData
-import com.markelovstyle.images.*
-import com.markelovstyle.util.Timer
+import com.markelovstyle.images.cropBorders
+import com.markelovstyle.images.letters.recognize
+import com.markelovstyle.images.thresholding
 import com.markelovstyle.util.base64Decode
 import iris.json.plain.JsonPlainParser
 import java.awt.image.BufferedImage
@@ -27,36 +26,6 @@ fun main() {
         source = ImageIO.read(inputStream)
         inputStream.close()
     }
-    val timer = Timer()
-    val th = thresholding(source)
-    ImageIO.write(source, "bmp", File("testResources\\check.bmp"))
-    val crop = cropBorders(th)
-    val letters = getLetters(crop)
-    for (i in 0 until letters.size) {
-        val cropped = cropBorders(letters[i])
-        val letter = addBorders(cropped, 120, 200)
-        /* TODO:
-            compare hash with db via hammingDistance
-            create binaryFind by DataItem.pixels with O(log N)
-         */
-        val hash = getHash(letter)
-        println(linearFind(hash))
-        // ImageIO.write(letter, "bmp", File("testResources\\${i}.bmp"))
-    }
-    // addLetters(source, "1w-ngenx}j")
-    timer.printTime()
-}
-
-fun addLetters(image: BufferedImage, recog: String) {
-    val chars = recog.toCharArray()
-    val th = thresholding(image)
-    val crop = cropBorders(th)
-    val letters = getLetters(crop)
-    for (i in 0 until letters.size) {
-        val cropped = cropBorders(letters[i])
-        val char = chars[i]
-        val letter = addBorders(cropped, 120, 200)
-        val hash = getHash(letter)
-        updateData(char, hash)
-    }
+    ImageIO.write(cropBorders(thresholding(source)), "bmp", File("testResources\\check.bmp"))
+    println(recognize(source))
 }
