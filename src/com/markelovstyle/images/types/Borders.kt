@@ -8,9 +8,9 @@ class Borders(var left: Int, var right: Int, var top: Int, var bottom: Int) {
         var bottom = bottom
     }
     val width: Int
-    get() = right - left
+    get() = right - left + 1
     val height: Int
-    get() = bottom - top
+    get() = bottom - top + 1
 
     override fun toString(): String {
         return "($left, $right, $top, $bottom)"

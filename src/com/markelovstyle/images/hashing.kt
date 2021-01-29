@@ -1,9 +1,18 @@
 package com.markelovstyle.images
 
+import com.markelovstyle.images.letters.letterHeight
+import com.markelovstyle.images.letters.letterWidth
 import java.awt.image.BufferedImage
 import java.math.BigInteger
 
-fun getHash(image: BufferedImage, side: Int = 64, color: Int = -1): BigInteger {  // default color is white; black is -16777216
+var side = 64
+    set(value) {
+        if (value in 9..128)
+            field = value
+    }
+
+fun getHash(source: BufferedImage, color: Int = -1): BigInteger {  // default color is white; black is -16777216
+    val image = addBorders(source, letterWidth, letterHeight)
     val resized = resize(image, side, side)
     var hash = 0.toBigInteger()
     for (y in 0 until side)

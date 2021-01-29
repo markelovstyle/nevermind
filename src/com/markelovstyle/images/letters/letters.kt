@@ -1,31 +1,32 @@
 package com.markelovstyle.images.letters
 
-import com.markelovstyle.compare.closeFind
-import com.markelovstyle.data.DataItem
 import com.markelovstyle.data.updateData
 import com.markelovstyle.images.*
 import com.markelovstyle.images.types.Borders
+import com.markelovstyle.images.types.Letter
 import java.awt.image.BufferedImage
-import java.io.File
-import java.lang.StringBuilder
-import java.util.ArrayList
-import javax.imageio.ImageIO
+import java.util.*
+import kotlin.math.ceil
 
-fun recognize(image: BufferedImage): String {
-    val items = getLettersData(image)
-    val builder = StringBuilder(items.size)
-    for (item in items) {
-        val hash = item.hash
-        val lineHeight = item.lineHeight
-        val char = closeFind(hash, lineHeight)
-        builder.append(char)
+var letterHeight = 200
+    set(value) {
+        if (0 < value)
+            field = value
     }
-    return builder.toString()
-}
+var letterWidth = 120
+    set(value) {
+        if (0 < value)
+            field = value
+    }
 
-fun getLetters(image: BufferedImage, color: Int = -1): Array<BufferedImage> {  // default color is white; black is -16777216
+fun getLetters(source: BufferedImage, color: Int = -1): List<Letter> {  // default color is white; black is -16777216
+    val th = thresholding(source)
+    val image = cropBorders(th)
+
     val width = image.width
     val height = image.height
+
+    val textTop = getTextTop(image)
 
     val borders: ArrayList<Borders> = arrayListOf()
     var isPreviousEmpty = true
@@ -44,34 +45,45 @@ fun getLetters(image: BufferedImage, color: Int = -1): Array<BufferedImage> {  /
         isPreviousEmpty = isEmpty
     }
     borders.last().right = image.width - 1
-    return Array(borders.size) { i -> crop(image, borders[i]) }
+    return List(borders.size) { i ->
+        crop(image, borders[i])
+    }.map { crop ->
+        Letter(
+            getHash(crop),
+            getLineHeight(crop, textTop)
+        )
+    }
 }
 
-fun getLettersData(image: BufferedImage): List<DataItem> {
-    val th = thresholding(image)
-    val crop = cropBorders(th)
-    val letters = getLetters(crop)
-    val items: MutableList<DataItem> = mutableListOf()
-    for (i in letters.indices) {
-        val letter = letters[i]
-        val cropped = cropBorders(letter)
-        val lineHeight = getLineHeight(letter)
-        val normalizedLetter = addBorders(cropped, 120, 200)
-        ImageIO.write(normalizedLetter, "bmp", File("testResources\\$i.bmp"))
-        val hash = getHash(normalizedLetter)
-        items.add(DataItem(0.toChar(), lineHeight, hash))
-    }
-    return items
+fun getLineHeight(image: BufferedImage, textTop: Int, color: Int = -1): Int {  // default color is white; black is -16777216
+    val borders = getBorders(image, color)
+    return ceil(borders.height / 2F).toInt() - (textTop - borders.top)
 }
+
+fun getTextTop(image: BufferedImage, color: Int = -1): Int {  // bla-bla about default color, this one is white
+    var lastCount = 0
+    for (x in 0 until image.width)
+        if (image.getRGB(x, image.height / 2) == color)
+            lastCount++
+    for (y in (0 until image.height / 2).reversed()) {
+        var count = 0
+        for (x in 0 until image.width)
+            if (image.getRGB(x, y) == color)
+                count++
+        if (lastCount / count > 1.7)
+            return y - 1
+        lastCount = count
+    }
+    return 0  // won`t happen
+}
+
 
 fun addLetters(image: BufferedImage, recog: String) {
     val chars = recog.toCharArray()
-    val letters = getLettersData(image)
+    val letters = getLetters(image)
     for (i in letters.indices) {
         val letter = letters[i]
-        val hash = letter.hash
-        val lineHeight = letter.lineHeight
         val char = chars[i]
-        updateData(char, lineHeight, hash)
+        updateData(char, letter.lineHeight, letter.hash)
     }
 }

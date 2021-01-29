@@ -3,11 +3,6 @@ package com.markelovstyle.images
 import com.markelovstyle.images.types.Borders
 import java.awt.image.BufferedImage
 
-fun getLineHeight(image: BufferedImage, color: Int = -1): Float {  // default color is white; black is -16777216
-    val borders = getBorders(image, color)
-    return (borders.top + borders.height / 2).toFloat() / image.height  // returns float in interval [0..1], where 0 is top, 1 is bottom
-}
-
 fun getBorders(image: BufferedImage, color: Int = -1): Borders {  // default color is white; black is -16777216
     val width = image.width
     val height = image.height
@@ -80,8 +75,8 @@ fun crop(source: BufferedImage, borders: Borders): BufferedImage {
             borders.height,
             borders.left,
             borders.top,
-            borders.right,
-            borders.bottom,
+            borders.right + 1,
+            borders.bottom + 1,
             null)
     g.dispose()
     return image
