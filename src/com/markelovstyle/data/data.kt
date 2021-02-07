@@ -1,9 +1,10 @@
 package com.markelovstyle.data
 
-import com.markelovstyle.images.types.DeterminedLetter
+import com.markelovstyle.images.types.Letter
 import java.io.File
 import java.io.FileNotFoundException
-import java.math.BigInteger
+import com.markelovstyle.util.println
+import java.lang.IllegalArgumentException
 
 var file: File = File("data.db")
 var data = loadData()
@@ -14,24 +15,35 @@ fun specifyDataFile(filename: String) {
         throw FileNotFoundException("File $filename was not found.")
 }
 
-fun loadData(): MutableList<DeterminedLetter> {
-    data = file.readLines().map { line -> DeterminedLetter(line) }.toMutableList()
+fun loadData(): MutableList<Letter> {
+    data = file.readLines().map { line -> Letter(line) }.toMutableList()
     return data
 }
 
-fun updateData(char: Char, lineHeight: Int, hash: BigInteger) {
+fun updateData(unknownLetter: Letter) {
     var exists = false
-    for (determinedLetter in data)
-        if (determinedLetter.char == char) {
-            determinedLetter.hash = hash
-            determinedLetter.lineHeight = lineHeight
+    for (letter in data)
+        if (letter.char == unknownLetter.char) {
+            letter.hash = unknownLetter.hash
+            if (unknownLetter.lineHeight != letter.lineHeight)
+                println(unknownLetter.char, letter.lineHeight, unknownLetter.lineHeight)
+            letter.lineHeight = unknownLetter.lineHeight
             exists = true
             break
         }
-    if (!exists)
-        data.add(DeterminedLetter(char, hash, lineHeight))
+    if (!exists) {
+        data.add(unknownLetter)
+        println(unknownLetter.char)
+    }
     sortData()
     saveData()
+}
+
+fun findLetter(char: Char): Letter {
+    for (letter in data)
+        if (letter.char == char)
+            return letter
+    throw IllegalArgumentException()
 }
 
 fun sortData() = data.sortBy { it.pixels }

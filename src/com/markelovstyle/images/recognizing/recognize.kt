@@ -1,8 +1,8 @@
 package com.markelovstyle.images.recognizing
 
 import com.markelovstyle.compare.closeFind
-import com.markelovstyle.images.letters.getLetters
+import com.markelovstyle.images.letters.getUnknownLetters
 import java.awt.image.BufferedImage
 
 fun recognize(image: BufferedImage): String =
-        getLetters(image).map { closeFind(it.hash, it.lineHeight) }.joinToString("") { "$it" }
+        getUnknownLetters(image).map { closeFind(it) }.joinToString("") { "$it" }

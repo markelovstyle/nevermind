@@ -1,57 +1,55 @@
 package com.markelovstyle.images
 
+import com.markelovstyle.images.letters.letterHeight
+import com.markelovstyle.images.letters.letterWidth
 import com.markelovstyle.images.types.Borders
 import java.awt.image.BufferedImage
 
 fun getBorders(image: BufferedImage, color: Int = -1): Borders {  // default color is white; black is -16777216
-    val width = image.width
-    val height = image.height
-
-    var left = width
-    var right = 0
-    var top: Int = height
-    var bottom = 0
-
-    top@
-    for (y in 0 until height)
-        for (x in 0 until width)
-            if (image.getRGB(x, y) == color) {
-                top = y
-                break@top
-            }
-
-    if (top == height)  // no pixels with that color
-        throw IllegalArgumentException()
-
-    bottom@
-    for (y in (0 until height).reversed())
-        for (x in 0 until width)
-            if (image.getRGB(x, y) == color) {
-                bottom = y
-                break@bottom
-            }
-    left@
-    for (x in 0 until width)
-        for (y in 0 until height)
-            if (image.getRGB(x, y) == color) {
-                left = x
-                break@left
-            }
-    right@
-    for (x in (0 until width).reversed())
-        for (y in 0 until height)
-            if (image.getRGB(x, y) == color) {
-                right = x
-                break@right
-            }
+    val left = getLeftBorder(image, color)
+    val right = getRightBorder(image, color)
+    val top = getTopBorder(image, color)
+    val bottom = getBottomBorder(image, color)
     return Borders(left, right, top, bottom)
+}
+
+fun getTopBorder(image: BufferedImage, color: Int = -1): Int {
+    for (y in 0 until image.height)
+        for (x in 0 until image.width)
+            if (image.getRGB(x, y) == color)
+                return y
+    return image.height - 1
+}
+
+fun getBottomBorder(image: BufferedImage, color: Int = -1): Int {
+    for (y in (0 until image.height).reversed())
+        for (x in 0 until image.width)
+            if (image.getRGB(x, y) == color)
+                return y
+    return 0
+}
+
+fun getLeftBorder(image: BufferedImage, color: Int = -1): Int {
+    for (x in 0 until image.width)
+        for (y in 0 until image.height)
+            if (image.getRGB(x, y) == color)
+                return x
+    return image.width - 1
+}
+
+fun getRightBorder(image: BufferedImage, color: Int = -1): Int {
+    for (x in (0 until image.width).reversed())
+        for (y in 0 until image.height)
+            if (image.getRGB(x, y) == color)
+                return x
+    return 0
 }
 
 fun cropBorders(image: BufferedImage, color: Int = -1): BufferedImage {  // default color is white; black is -16777216
     return crop(image, getBorders(image, color))
 }
 
-fun addBorders(source: BufferedImage, w: Int, h: Int): BufferedImage {
+fun addBorders(source: BufferedImage, w: Int = letterWidth, h: Int = letterHeight): BufferedImage {
     val width = source.width
     val height = source.height
 

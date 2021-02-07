@@ -1,13 +1,22 @@
 package com.markelovstyle.images.types
 
-import com.markelovstyle.images.countBinaryOnes
 import java.math.BigInteger
 
-open class Letter(hash: BigInteger, var lineHeight: Int) {
-    var pixels: Int = countBinaryOnes(hash)
-    var hash: BigInteger = hash
-        set(value) {
-            pixels = countBinaryOnes(hash)
-            field = value
-        }
+private class Params(line: String) {
+    val char: Char
+    val lineHeight: Int
+    val hash: BigInteger
+
+    init {
+        val pair = line.split(',')
+        this.char = pair[0].toInt().toChar()
+        this.lineHeight = pair[1].toInt()
+        this.hash = pair[2].toBigInteger()
+    }
+}
+
+class Letter(val char: Char, hash: BigInteger, lineHeight: Int): UnknownLetter(hash, lineHeight) {
+    private constructor(params: Params): this(params.char, params.hash, params.lineHeight)
+    constructor(line: String): this(Params(line))
+    constructor(char: Char, unknownLetter: UnknownLetter): this(char, unknownLetter.hash, unknownLetter.lineHeight)
 }
